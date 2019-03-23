@@ -1,0 +1,12 @@
+body{
+    padding-top: 70px;
+    margin: 0;
+}
+
+.maincontainer{
+    min-height: calc(100vh - 230px);
+}
+
+header{
+    height: 80px;
+}

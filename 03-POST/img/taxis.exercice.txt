@@ -1,0 +1,74 @@
+-- 1 Pour éviter les erreurs, la société de taxis aimerait que l'on ne puisse pas faire de mauvaise association . (ex: conducteur ou vehicule inexistant)
+
+
+
+-- 2 Lorsqu'un conducteur est modifié, la société aimerait que cela soit répercuté dans la table d'association
+
+
+
+-- 3 La société souhaite bloquer la suppression d'un conducteur s'il est toujours associé à un véhicule
+
+
+
+-- 4 Lorqu'un véhicule est modifié, la société aimerait que cela soit répercuté dans la table d'association
+
+
+
+-- 5 Si un véhicule est supprimé, la, société aimerait garder l'historique dans la table association en précisant NULL à la place du numéro de véhicule.
+
+-- CONTRAINTES sur association_vehicule_conducteur 
+
+ALTER TABLE association_vehicule_conducteur
+    ADD CONSTRAINT contrainte_conducteur FOREIGN-KEY (id_conducteur) REFERENCES conducteur (id_conducteur) ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT contrainte_vehicule FOREIGN-KEY (id_vehicule) REFERENCES vehicule (id_vehicule) ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- 6 Qui conduit la voiture 503 ?
+SELECT c.prenom FROM conducteur c, association_vehicule_conducteur avc 
+WHERE avc.id_conducteur = c.id_conducteur 
+AND avc.id_vehicule = 503;
+
+
+-- 7 Qui conduit quoi ?
+SELECT c.prenom, v.marque, v.modele 
+FROM conducteur c, association_vehicule_conducteur avc, vehicule v 
+WHERE avc.id_conducteur = c.id_conducteur 
+AND avc.id_vehicule = v.id_vehicule;
+
+
+
+-- 8 Après vous être ajouté en tant que conducteur, afficher les conducteurs et les véhicules y compris ceux qui n'ont pas encore de véhicule associé
+INSERT INTO conducteur VALUES (NULL,'Rablo','Keomenivanh');
+
+SELECT c.prenom, avc.id_vehicule FROM conducteur c
+LEFT JOIN association_vehicule_conducteur avc ON association_vehicule_conducteur = c.id_conducteur;
+
+
+-- 9 Ajouter un véhicule et afficher les mêmes informations y compris les véhicules sans conducteur
+INSERT INTO vehicule VALUES (NULL, 'Dacia', 'Sandero', 'bleu', 'ZZ-84-LL');
+
+SELECT v.modele, avc.id_conducteur FROM vehicule v
+LEFT JOIN association_vehicule_conducteur avc ON avc.id_vehicule = v.id_vehicule
+LEFT JOIN conducteur c ON avc.association_vehicule_conducteur = c.id_conducteur;
+
+
+-- 10 Afficher tous les conducteurs et tous les véhicules même ceux non associés.
+
+SELECT c.prenom,v.modele FROM conducteur c
+LEFT JOIN association_vehicule_conducteur avc ON avc.id_conducteur = c.id_conducteur
+LEFT JOIN vehicule v ON avc.id_vehicule = v.id_vehicule
+UNION
+SELECT v.modele, avc.id_conducteur FROM vehicule v
+LEFT JOIN association_vehicule_conducteur avc ON avc.id_vehicule = v.id_vehicule
+LEFT JOIN conducteur c ON avc.association_vehicule_conducteur = c.id_conducteur;
+
+
+
+SELECT * FROM conducteur c
+LEFT JOIN association_vehicule_conducteur avc ON avc.id_conducteur = c.id_conducteur
+LEFT JOIN vehicule v ON v.id_vehicule = avc.id_vehicule
+UNION
+SELECT * FROM conducteur c
+RIGHT JOIN association_vehicule_conducteur avc ON avc.id_conducteur = c.id_conducteur
+RIGHT JOIN vehicule v ON v.id_vehicule = avc.id_vehicule;
